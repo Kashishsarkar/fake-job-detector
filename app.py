@@ -1,4 +1,3 @@
-# app.py
 import streamlit as st
 import joblib
 
@@ -6,13 +5,24 @@ import joblib
 model = joblib.load('rf_model.pkl')
 vectorizer = joblib.load('tfidf_vectorizer.pkl')
 
-st.title("Text Classification App")
+# App title
+st.title("🕵️‍♂️ Fake Job Posting Detector")
+st.write("Paste a job description below (e.g., title, description, requirements, etc.):")
 
-# Input text
-user_input = st.text_area("Enter your text here:")
+# Input box
+user_input = st.text_area("Job Posting Text")
 
-# Predict
+# Predict button
 if st.button("Predict"):
-    transformed_input = vectorizer.transform([user_input])
-    prediction = model.predict(transformed_input)
-    st.success(f"Prediction: {prediction[0]}")
+    if user_input.strip() == "":
+        st.warning("Please enter some text.")
+    else:
+        cleaned = user_input.lower()
+        cleaned = ''.join([c for c in cleaned if c.isalpha() or c.isspace()])
+        vectorized = vectorizer.transform([cleaned])
+        prediction = model.predict(vectorized)[0]
+
+        if prediction == 1:
+            st.error("❌ This looks like a FAKE job posting.")
+        else:
+            st.success("✅ This looks like a REAL job posting.")
